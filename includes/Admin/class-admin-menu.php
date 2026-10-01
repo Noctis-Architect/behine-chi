@@ -126,12 +126,12 @@ class Admin_Menu {
         $settings = Settings::instance();
         $stats    = Dashboard_Widgets::get_stats();
         $driver   = Optimizer::instance()->get_driver();
-        $is_dark  = false;
+        $is_dark  = (bool) $settings->get('wso_dark_mode', 0);
         $enabled  = (bool) $settings->get('wso_enable', 1);
 
         $available_fonts = Font_Manager::instance()->get_available_fonts();
         ?>
-        <div class="wso-wrap" id="wso-app" dir="rtl">
+        <div class="wso-wrap<?php echo $is_dark ? ' wso-dark-mode' : ''; ?>" id="wso-app" dir="rtl">
             
             <!-- STICKY TOP HEADER -->
             <header class="wso-header">
@@ -150,6 +150,12 @@ class Admin_Menu {
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                         <input type="text" id="wso-settings-search" placeholder="جستجوی تنظیمات..." />
                     </div>
+
+                    <!-- Dark mode toggle button -->
+                    <button type="button" class="wso-btn-theme-toggle" id="wso-theme-toggle" title="تغییر حالت تاریک/روشن">
+                        <svg class="wso-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                        <svg class="wso-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    </button>
 
                     <!-- Notification bell with badge -->
                     <button type="button" class="wso-btn-icon-toggle wso-nav-badge-trigger" id="wso-btn-open-notify" title="اعلان‌ها" onclick="jQuery('a[data-tab=tab-notifications]').click();">
@@ -173,7 +179,7 @@ class Admin_Menu {
             <?php endif; ?>
 
             <form id="wso-settings-form" method="post">
-                <input type="hidden" name="wso_dark_mode" id="wso_dark_mode_input" value="0" />
+                <input type="hidden" name="wso_dark_mode" id="wso_dark_mode_input" value="<?php echo $is_dark ? '1' : '0'; ?>" />
 
                 <div class="wso-container">
                     

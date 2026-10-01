@@ -118,9 +118,21 @@
         $('#wso-progress-percent').text('٪' + pct);
     }
 
+    function escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
     function addLogEntry(msg, type) {
         var $feed = $('#wso-log-feed');
-        var entry = '<div class="wso-log-entry ' + (type || 'info') + '">[' + new Date().toLocaleTimeString() + '] ' + msg + '</div>';
+        var safeType = escapeHtml(type || 'info');
+        var safeMsg = escapeHtml(msg);
+        var entry = '<div class="wso-log-entry ' + safeType + '">[' + new Date().toLocaleTimeString() + '] ' + safeMsg + '</div>';
         $feed.append(entry);
         $feed.scrollTop($feed[0].scrollHeight);
     }
