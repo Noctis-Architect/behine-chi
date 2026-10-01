@@ -265,8 +265,13 @@ class Queue_Manager {
             foreach ($results as $row) {
                 $status = $row['status'];
                 $count  = (int) $row['count'];
+                if ($status === 'success') {
+                    $status = 'completed';
+                } elseif ($status === 'error') {
+                    $status = 'failed';
+                }
                 if (isset($stats[$status])) {
-                    $stats[$status] = $count;
+                    $stats[$status] += $count;
                 }
                 $stats['total'] += $count;
             }

@@ -129,7 +129,14 @@ class Async_Processor {
             $status = $res['status'] ?? Logger::STATUS_ERROR;
             $msg    = $res['message'] ?? '';
 
-            $manager->update_status($item['id'], $status, $msg);
+            // Map Logger status constants to queue statuses
+            $queue_status = match ($status) {
+                Logger::STATUS_SUCCESS => 'completed',
+                Logger::STATUS_SKIPPED => 'skipped',
+                default                => 'failed',
+            };
+
+            $manager->update_status($item['id'], $queue_status, $msg);
             $processed_results[] = [
                 'id'      => $item['id'],
                 'file'    => basename($file_path),
