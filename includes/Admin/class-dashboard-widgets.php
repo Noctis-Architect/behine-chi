@@ -37,21 +37,28 @@ class Dashboard_Widgets {
         $query = new \WP_Query($args);
         $total_images = count($query->posts);
 
-        // Sum original and optimized sizes from logs table (deduplicated by file_name)
-        $sums = $wpdb->get_row(
-            "SELECT 
-                COUNT(*) as count,
-                SUM(t.original_size) as total_original, 
-                SUM(t.optimized_size) as total_optimized, 
-                SUM(t.saved_bytes) as total_saved 
-             FROM (
-                SELECT file_name, original_size, optimized_size, saved_bytes 
-                FROM {$logs_table} 
-                WHERE status = 'success' 
-                GROUP BY file_name
-             ) t",
-            ARRAY_A
-        );
+        // Sum original and optimized sizes from logs table (deduplicated by file_name, MySQL ONLY_FULL_GROUP_BY safe)
+        $sums = null;
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $logs_table)) === $logs_table) {
+            $sums = $wpdb->get_row(
+                "SELECT 
+                    COUNT(*) as count,
+                    SUM(t.orig_size) as total_original, 
+                    SUM(t.opt_size) as total_optimized, 
+                    SUM(t.saved) as total_saved 
+                 FROM (
+                    SELECT 
+                        file_name, 
+                        MAX(original_size) as orig_size, 
+                        MIN(optimized_size) as opt_size, 
+                        MAX(saved_bytes) as saved 
+                    FROM {$logs_table} 
+                    WHERE status = 'success' 
+                    GROUP BY file_name
+                 ) t",
+                ARRAY_A
+            );
+        }
 
         $optimized_count = (int) ($sums['count'] ?? 0);
         $orig_size       = (int) ($sums['total_original'] ?? 0);
