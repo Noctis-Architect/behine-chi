@@ -331,6 +331,7 @@ class Optimizer {
         $base_dir = dirname($file);
         $meta = wp_get_attachment_metadata($attachment_id);
         $has_meta_updates = false;
+        $delete_original = (bool) Settings::instance()->get('wso_delete_original', 0);
 
         // Process thumbnail sub-sizes
         if (!empty($meta['sizes']) && is_array($meta['sizes'])) {
@@ -341,14 +342,22 @@ class Optimizer {
                         // Thumbnails are never watermarked (avoids overflow + double-apply).
                         $sub_res = $this->optimize_file($sub_file, $attachment_id, false);
                         // If converted to avif/webp, update metadata filename
+                        $converted_sub = '';
                         if (!empty($sub_res['formats']['avif']) && file_exists($sub_res['formats']['avif'])) {
-                            $meta['sizes'][$size_key]['file'] = basename($sub_res['formats']['avif']);
+                            $converted_sub = $sub_res['formats']['avif'];
+                            $meta['sizes'][$size_key]['file'] = basename($converted_sub);
                             $meta['sizes'][$size_key]['mime-type'] = 'image/avif';
                             $has_meta_updates = true;
                         } elseif (!empty($sub_res['formats']['webp']) && file_exists($sub_res['formats']['webp'])) {
-                            $meta['sizes'][$size_key]['file'] = basename($sub_res['formats']['webp']);
+                            $converted_sub = $sub_res['formats']['webp'];
+                            $meta['sizes'][$size_key]['file'] = basename($converted_sub);
                             $meta['sizes'][$size_key]['mime-type'] = 'image/webp';
                             $has_meta_updates = true;
+                        }
+
+                        // Remove original thumbnail file if converted and option enabled
+                        if ($delete_original && !empty($converted_sub) && file_exists($converted_sub) && $converted_sub !== $sub_file) {
+                            @unlink($sub_file);
                         }
                     }
                 }
@@ -385,6 +394,11 @@ class Optimizer {
                 ['%s'],
                 ['%d']
             );
+
+            // Remove original main file if converted and option enabled
+            if ($delete_original && file_exists($converted_file) && $converted_file !== $file) {
+                @unlink($file);
+            }
         }
 
         if ($has_meta_updates && is_array($meta)) {
