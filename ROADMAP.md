@@ -5,35 +5,35 @@
 ---
 
 ## فاز ۱: پایداری دیتابیس و هسته پردازش (Core & Database Stability)
-- [ ] **وظیفه ۱ (`fix/dashboard-sql-group-by`)**: اصلاح کوئری آمار پیشخوان در `Dashboard_Widgets` جهت سازگاری با حالت سخت‌گیرانه `ONLY_FULL_GROUP_BY` در MySQL 5.7+ و 8.0+.
-- [ ] **وظیفه ۲ (`fix/dashboard-scan-performance`)**: کش‌گذاری اسکن فایل‌های WebP/AVIF پوشه آپلود در ترنزینت و جلوگیری از فریز شدن و خطای تایم‌اوت ۵۰۴ در بارگذاری صفحه مدیریت.
-- [ ] **وظیفه ۳ (`fix/queue-status-mismatch`)**: یکپارچه‌سازی وضعیت‌های صف پردازش (`completed/failed` در برابر `success/error`) برای کارکرد دقیق درصد پیشرفت و آمار زنده.
-- [ ] **وظیفه ۴ (`fix/bulk-queue-duplicate-attachments`)**: فیلتر کردن تصاویر قبلاً بهینه‌شده (`_wso_optimized`) در ساخت صف همگانی جهت جلوگیری از پردازش تکراری رسانه‌ها.
+- [x] **وظیفه ۱ (`fix/dashboard-sql-group-by`)**: اصلاح کوئری آمار پیشخوان در `Dashboard_Widgets` جهت سازگاری با حالت سخت‌گیرانه `ONLY_FULL_GROUP_BY` در MySQL 5.7+ و 8.0+.
+- [x] **وظیفه ۲ (`fix/dashboard-scan-performance`)**: کش‌گذاری اسکن فایل‌های WebP/AVIF پوشه آپلود در ترنزینت و جلوگیری از فریز شدن و خطای تایم‌اوت ۵۰۴ در بارگذاری صفحه مدیریت.
+- [x] **وظیفه ۳ (`fix/queue-status-mismatch`)**: یکپارچه‌سازی وضعیت‌های صف پردازش (`completed/failed` در برابر `success/error`) برای کارکرد دقیق درصد پیشرفت و آمار زنده.
+- [x] **وظیفه ۴ (`fix/bulk-queue-duplicate-attachments`)**: فیلتر کردن تصاویر قبلاً بهینه‌شده (`_wso_optimized`) در ساخت صف همگانی جهت جلوگیری از پردازش تکراری رسانه‌ها.
 
 ---
 
 ## فاز ۲: تضمین تمامیت رسانه‌ها و سیستم پشتیبان‌گیری (Media & Backup Integrity)
-- [ ] **وظیفه ۵ (`fix/single-restore-backup-path`)**: اصلاح شناسایی پسوند اولیه فایل در `Backup_Manager` هنگام بازگردانی تکی رسانه‌های تبدیل‌شده به WebP/AVIF.
-- [ ] **وظیفه ۶ (`fix/restore-all-metadata-revert`)**: بازنشانی متاداده‌های دیتابیس (`_wp_attached_file` و `post_mime_type`) در بازگردانی همگانی برای جلوگیری از خطای ۴۰۴ تصاویر.
-- [ ] **وظیفه ۷ (`fix/safe-cache-purge`)**: محافظت از تصاویر اصلی آپلودشده و پوشه `wso-backups` هنگام اجرای ابزار پاکسازی کش WebP/AVIF.
-- [ ] **وظیفه ۸ (`feature/implement-delete-original`)**: پیاده‌سازی قابلیت حذف فایل اصلی (`wso_delete_original`) پس از تبدیل موفق و تهیه بکاپ تضمینی.
+- [x] **وظیفه ۵ (`fix/single-restore-backup-path`)**: اصلاح شناسایی پسوند اولیه فایل در `Backup_Manager` هنگام بازگردانی تکی رسانه‌های تبدیل‌شده به WebP/AVIF.
+- [x] **وظیفه ۶ (`fix/restore-all-metadata-revert`)**: بازنشانی متاداده‌های دیتابیس (`_wp_attached_file` و `post_mime_type`) در بازگردانی همگانی برای جلوگیری از خطای ۴۰۴ تصاویر.
+- [x] **وظیفه ۷ (`fix/safe-cache-purge`)**: محافظت از تصاویر اصلی آپلودشده و پوشه `wso-backups` هنگام اجرای ابزار پاکسازی کش WebP/AVIF.
+- [x] **وظیفه ۸ (`feature/implement-delete-original`)**: پیاده‌سازی قابلیت حذف فایل اصلی (`wso_delete_original`) پس از تبدیل موفق و تهیه بکاپ تضمینی.
 
 ---
 
 ## فاز ۳: جریان آپلود، بندانگشتی‌ها و ادغام وردپرس (Upload Pipeline & Integration)
-- [ ] **وظیفه ۹ (`fix/upload-double-optimization`)**: رفع پردازش دوبل در زمان آپلود، حذف تداخل `wp_handle_upload`، اعمال تنظیم `wso_auto_optimize` و فعال‌سازی در REST API و گوتنبرگ.
-- [ ] **وظیفه ۱۰ (`fix/thumbnail-upload-metadata`)**: پاس دادن مستقیم آرایه متادیتا به `optimize_attachment` برای تضمین بهینه‌سازی کلیه سایزهای بندانگشتی در زمان آپلود.
+- [x] **وظیفه ۹ (`fix/upload-double-optimization`)**: رفع پردازش دوبل در زمان آپلود، حذف تداخل `wp_handle_upload`، اعمال تنظیم `wso_auto_optimize` و فعال‌سازی در REST API و گوتنبرگ.
+- [x] **وظیفه ۱۰ (`fix/thumbnail-upload-metadata`)**: پاس دادن مستقیم آرایه متادیتا به `optimize_attachment` برای تضمین بهینه‌سازی کلیه سایزهای بندانگشتی در زمان آپلود.
 
 ---
 
 ## فاز ۴: ابزارها، امنیت و بهبود رابط کاربری (Tools, Security & UI Polish)
-- [ ] **وظیفه ۱۱ (`fix/auto-alt-batch-offset`)**: رفع باگ آفست در ابزار پر کردن دسته‌ای متن جایگزین (Alt) خودکار.
-- [ ] **وظیفه ۱۲ (`fix/security-xss-and-assets`)**: جلوگیری از XSS در لاگ‌ها و اعلان‌ها با Escape کردن خروجی‌ها و تنظیم وابستگی اسکریپت‌ها.
-- [ ] **وظیفه ۱۳ (`feature/dark-mode-toggle`)**: اضافه کردن کلید سوئیچ دارک‌مود در هدر و اتصال پویای آن به استایل‌ها و تنظیمات افزونه.
+- [x] **وظیفه ۱۱ (`fix/auto-alt-batch-offset`)**: رفع باگ آفست در ابزار پر کردن دسته‌ای متن جایگزین (Alt) خودکار.
+- [x] **وظیفه ۱۲ (`fix/security-xss-and-assets`)**: جلوگیری از XSS در لاگ‌ها و اعلان‌ها با Escape کردن خروجی‌ها و تنظیم وابستگی اسکریپت‌ها.
+- [x] **وظیفه ۱۳ (`feature/dark-mode-toggle`)**: اضافه کردن کلید سوئیچ دارک‌مود در هدر و اتصال پویای آن به استایل‌ها و تنظیمات افزونه.
 
 ---
 
 ## فاز ۵: بسته‌بندی نهایی و تحویل (Packaging & Release)
-- [ ] تست نهایی صحت سینتکس تمامی فایل‌های PHP.
-- [ ] مرج کردن تمامی برنچ‌ها در شاخه `main`.
-- [ ] ایجاد فایل فشرده نهایی (`behine-chi.zip`) آماده نصب روی سایت وردپرس.
+- [x] تست نهایی صحت سینتکس تمامی فایل‌های PHP.
+- [x] مرج کردن تمامی برنچ‌ها در شاخه `main`.
+- [x] ایجاد فایل فشرده نهایی (`behine-chi.zip`) آماده نصب روی سایت وردپرس.
