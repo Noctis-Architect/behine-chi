@@ -204,7 +204,7 @@ class Optimizer {
         $generated_formats = [];
 
         // Generate WebP
-        if ($settings->get('wso_convert_webp', 1)) {
+        if ($ext !== 'webp' && $settings->get('wso_convert_webp', 1)) {
             $info = pathinfo($file_path);
             $webp_file = $info['dirname'] . '/' . $info['filename'] . '.webp';
             if ($this->driver->convert($file_path, $webp_file, 'image/webp', $quality)) {
@@ -213,7 +213,7 @@ class Optimizer {
         }
 
         // Generate AVIF
-        if ($settings->get('wso_convert_avif', 0)) {
+        if ($ext !== 'avif' && $settings->get('wso_convert_avif', 0)) {
             $info = pathinfo($file_path);
             $avif_file = $info['dirname'] . '/' . $info['filename'] . '.avif';
             if ($this->driver->convert($file_path, $avif_file, 'image/avif', $quality)) {
@@ -294,7 +294,7 @@ class Optimizer {
         return empty($candidates) ? $current_size : max(array_map('intval', $candidates));
     }
 
-    public function optimize_attachment(int $attachment_id): array {
+    public function optimize_attachment(int $attachment_id, ?array $meta = null): array {
         $file = get_attached_file($attachment_id);
         if (!$file || !file_exists($file)) {
             return [
@@ -329,7 +329,9 @@ class Optimizer {
         }
 
         $base_dir = dirname($file);
-        $meta = wp_get_attachment_metadata($attachment_id);
+        if (null === $meta) {
+            $meta = wp_get_attachment_metadata($attachment_id);
+        }
         $has_meta_updates = false;
         $delete_original = (bool) Settings::instance()->get('wso_delete_original', 0);
 
@@ -407,6 +409,9 @@ class Optimizer {
 
         $result['optimized_at'] = current_time('mysql');
         $result['optimization_status'] = $result['status'];
+        if (is_array($meta)) {
+            $result['metadata'] = $meta;
+        }
 
         update_post_meta($attachment_id, '_wso_optimized', 1);
         update_post_meta($attachment_id, '_wso_opt_data', $result);

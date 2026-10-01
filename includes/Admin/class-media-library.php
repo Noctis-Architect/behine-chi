@@ -67,10 +67,13 @@ class Media_Library {
             return $metadata;
         }
 
-        $res = Optimizer::instance()->optimize_attachment($attachment_id);
+        $res = Optimizer::instance()->optimize_attachment($attachment_id, $metadata);
         if ($res['status'] === \WSO\Tools\Logger::STATUS_SUCCESS) {
+            if (!empty($res['metadata']) && is_array($res['metadata'])) {
+                return $res['metadata'];
+            }
             $updated_meta = wp_get_attachment_metadata($attachment_id);
-            if (is_array($updated_meta)) {
+            if (is_array($updated_meta) && !empty($updated_meta)) {
                 return $updated_meta;
             }
         }
