@@ -203,8 +203,26 @@ class Optimizer {
 
         $generated_formats = [];
 
-        // Generate WebP
-        if ($ext !== 'webp' && $settings->get('wso_convert_webp', 1)) {
+        // Generate WebP or Re-compress existing WebP
+        if ($ext === 'webp') {
+            $recompress_webp = (bool) $settings->get('wso_recompress_webp', 1);
+            $min_size_kb = (int) $settings->get('wso_webp_min_size_kb', 50);
+            $min_size_bytes = $min_size_kb * 1024;
+
+            if ($recompress_webp && ($orig_size >= $min_size_bytes)) {
+                $temp_file = $file_path . '.wso_tmp.webp';
+                if ($this->driver->convert($file_path, $temp_file, 'image/webp', $quality)) {
+                    $new_size = file_exists($temp_file) ? (int) filesize($temp_file) : 0;
+                    if ($new_size > 0 && $new_size < $orig_size) {
+                        @rename($temp_file, $file_path);
+                        clearstatcache(true, $file_path);
+                        $generated_formats['webp'] = $file_path;
+                    } else {
+                        @unlink($temp_file);
+                    }
+                }
+            }
+        } elseif ($settings->get('wso_convert_webp', 1)) {
             $info = pathinfo($file_path);
             $webp_file = $info['dirname'] . '/' . $info['filename'] . '.webp';
             if ($this->driver->convert($file_path, $webp_file, 'image/webp', $quality)) {

@@ -22,9 +22,12 @@
 
         addLogEntry('در حال ایجاد صف تصاویر جهت بهینه‌سازی...', 'info');
 
+        var forceReoptimize = $('#wso-force-reoptimize').is(':checked') ? 1 : 0;
+
         $.post(wsoData.ajax_url, {
             action: 'wso_build_queue',
-            nonce: wsoData.nonce
+            nonce: wsoData.nonce,
+            force: forceReoptimize
         }).done(function (response) {
             if (response.success) {
                 totalItems = response.data.count;

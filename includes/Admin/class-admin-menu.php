@@ -500,6 +500,28 @@ class Admin_Menu {
                                         </span>
                                     </label>
                                 </div>
+
+                                <div class="wso-form-group wso-mt-4">
+                                    <label class="wso-toggle-label">
+                                        <input type="checkbox" name="wso_recompress_webp" id="wso_recompress_webp" value="1" <?php checked(1, $settings->get('wso_recompress_webp', 1)); ?>>
+                                        <span class="wso-toggle-slider"></span>
+                                        <span class="wso-toggle-text">
+                                            <strong>بهینه‌سازی و فشرده‌سازی مجدد تصاویر WebP موجود</strong>
+                                            <small>تصاویری که از قبل با فرمت WebP آپلود شده‌اند نیز با کیفیت تعیین‌شده فشرده می‌شوند (تنها در صورتی که حجمشان کاهش یابد).</small>
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <div class="wso-form-group wso-mt-3" id="wso_webp_min_size_row">
+                                    <label for="wso_webp_min_size_kb" style="display:block; margin-bottom:6px;">
+                                        <strong>حداقل حجم تصویر WebP برای فشرده‌سازی مجدد:</strong>
+                                    </label>
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <input type="number" name="wso_webp_min_size_kb" id="wso_webp_min_size_kb" value="<?php echo esc_attr($settings->get('wso_webp_min_size_kb', 50)); ?>" min="0" max="10240" step="10" class="wso-input-small" style="width:100px;">
+                                        <span class="wso-unit">کیلوبایت (KB)</span>
+                                    </div>
+                                    <small class="wso-text-muted" style="display:block; margin-top:4px;">فقط تصاویر WebP با حجم بالاتر از این مقدار (مثلاً ۵۰ یا ۱۰۰ کیلوبایت) بررسی و فشرده می‌شوند تا کیفیت آیکون‌ها و فایل‌های خیلی سبک تغییر نکند. عدد ۰ به معنی بررسی تمام تصاویر WebP است.</small>
+                                </div>
                             </div>
                         </div>
 
@@ -630,6 +652,13 @@ class Admin_Menu {
                                     <button type="button" class="wso-btn wso-btn-danger" id="wso-reset-bulk">
                                         پاکسازی و ریست صف
                                     </button>
+                                </div>
+
+                                <div class="wso-mt-2" style="margin-bottom: 15px;">
+                                    <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-size:13px;">
+                                        <input type="checkbox" id="wso-force-reoptimize" value="1">
+                                        <span><strong>پردازش مجدد کل رسانه‌ها (شامل تصاویر بررسی یا نشانه‌گذاری‌شده قبلی)</strong> — برای فشرده‌سازی WebPهای موجود یا اعمال کیفیت جدید</span>
+                                    </label>
                                 </div>
 
                                 <div class="wso-progress-container wso-mt-4" style="display:none;" id="wso-progress-box">

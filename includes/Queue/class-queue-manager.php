@@ -45,7 +45,7 @@ class Queue_Manager {
      *
      * @return int Number of newly items queued.
      */
-    public function populate_media_library_queue(): int {
+    public function populate_media_library_queue(bool $force = false): int {
         global $wpdb;
         $db = Database::instance();
         $table = $db->queue_table;
@@ -56,13 +56,21 @@ class Queue_Manager {
             'post_mime_type' => ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'],
             'posts_per_page' => -1,
             'fields'         => 'ids',
-            'meta_query'     => [
+        ];
+
+        if (!$force) {
+            $args['meta_query'] = [
                 [
                     'key'     => '_wso_optimized',
                     'compare' => 'NOT EXISTS',
                 ],
-            ],
-        ];
+            ];
+        }
+
+        if ($force) {
+            // When forcing re-optimization, reset all non-processing items back to pending
+            $wpdb->query("UPDATE {$table} SET status = 'pending', error_message = NULL WHERE status != 'processing'");
+        }
 
         $query = new \WP_Query($args);
         $attachment_ids = $query->posts;

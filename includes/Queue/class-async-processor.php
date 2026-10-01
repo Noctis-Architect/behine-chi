@@ -70,8 +70,9 @@ class Async_Processor {
             wp_send_json_error(['message' => 'افزونه غیرفعال است و امکان ساخت صف وجود ندارد.'], 400);
         }
 
+        $force = !empty($_POST['force']);
         $manager = Queue_Manager::instance();
-        $new_count = $manager->populate_media_library_queue();
+        $new_count = $manager->populate_media_library_queue($force);
         $stats = $manager->get_stats();
         $total_pending = $stats['pending'] ?? 0;
 
