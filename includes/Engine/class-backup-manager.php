@@ -117,43 +117,74 @@ class Backup_Manager {
     }
 
     /**
+     * Resolves existing backup path for a file, checking candidate extensions
+     * in case the working file was converted to WebP or AVIF.
+     *
+     * @param string $file_path
+     * @return string|null
+     */
+    public function find_backup_path(string $file_path): ?string {
+        $exact = $this->get_backup_path($file_path);
+        if (file_exists($exact) && filesize($exact) > 0) {
+            return $exact;
+        }
+
+        $info = pathinfo($exact);
+        $base_name = $info['dirname'] . '/' . $info['filename'];
+        $candidates = ['jpg', 'jpeg', 'png', 'webp', 'avif', 'svg'];
+        foreach ($candidates as $ext) {
+            $candidate_path = $base_name . '.' . $ext;
+            if (file_exists($candidate_path) && filesize($candidate_path) > 0) {
+                return $candidate_path;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Checks if backup exists for a file.
      *
      * @param string $file_path
      * @return bool
      */
     public function has_backup(string $file_path): bool {
-        $path = $this->get_backup_path($file_path);
-        return file_exists($path) && filesize($path) > 0;
+        return null !== $this->find_backup_path($file_path);
     }
 
     /**
      * Restores a single file from its backup.
      *
      * @param string $file_path
-     * @return bool
+     * @return string|bool Restored file path on success, false on failure.
      */
-    public function restore(string $file_path): bool {
-        $backup_path = $this->get_backup_path($file_path);
-        if (!file_exists($backup_path) || filesize($backup_path) === 0) {
+    public function restore(string $file_path) {
+        $backup_path = $this->find_backup_path($file_path);
+        if (!$backup_path || !file_exists($backup_path) || filesize($backup_path) === 0) {
             return false;
         }
 
-        $restored = @copy($backup_path, $file_path);
+        $backup_ext = strtolower(pathinfo($backup_path, PATHINFO_EXTENSION));
+        $file_info = pathinfo($file_path);
+        $target_path = $file_info['dirname'] . '/' . $file_info['filename'] . '.' . $backup_ext;
 
-        // Also clean up WebP and AVIF generated variants
-        $info = pathinfo($file_path);
-        $webp = $info['dirname'] . '/' . $info['filename'] . '.webp';
-        $avif = $info['dirname'] . '/' . $info['filename'] . '.avif';
+        $restored = @copy($backup_path, $target_path);
+        if (!$restored) {
+            return false;
+        }
 
-        if (file_exists($webp)) {
+        // Clean up WebP and AVIF variants if original wasn't of that type
+        $webp = $file_info['dirname'] . '/' . $file_info['filename'] . '.webp';
+        $avif = $file_info['dirname'] . '/' . $file_info['filename'] . '.avif';
+
+        if ($backup_ext !== 'webp' && file_exists($webp)) {
             @unlink($webp);
         }
-        if (file_exists($avif)) {
+        if ($backup_ext !== 'avif' && file_exists($avif)) {
             @unlink($avif);
         }
 
-        return (bool) $restored;
+        return $target_path;
     }
 
     /**
