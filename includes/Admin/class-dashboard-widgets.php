@@ -67,29 +67,57 @@ class Dashboard_Widgets {
 
         $space_saved_pct = $orig_size > 0 ? round(($saved_bytes / $orig_size) * 100, 1) : 0;
 
-        // WebP & AVIF count across upload folder
-        $upload_dir = wp_upload_dir()['basedir'];
-        $webp_count = 0;
-        $avif_count = 0;
-        $cache_bytes= 0;
+        // Cached WebP & AVIF count across upload folder (prevents freezing on huge media libraries)
+        $folder_stats = get_transient('wso_dashboard_folder_stats');
+        if (false === $folder_stats || !is_array($folder_stats)) {
+            $upload_dir = wp_upload_dir()['basedir'];
+            $webp_count  = 0;
+            $avif_count  = 0;
+            $cache_bytes = 0;
 
-        if (is_dir($upload_dir)) {
-            $iterator = new \RecursiveIteratorIterator(
-                new \RecursiveDirectoryIterator($upload_dir, \RecursiveDirectoryIterator::SKIP_DOTS),
-                \RecursiveIteratorIterator::SELF_FIRST
-            );
-            foreach ($iterator as $file) {
-                if ($file->isFile()) {
-                    $ext = strtolower($file->getExtension());
-                    if ($ext === 'webp') {
-                        $webp_count++;
-                        $cache_bytes += $file->getSize();
-                    } elseif ($ext === 'avif') {
-                        $avif_count++;
-                        $cache_bytes += $file->getSize();
+            if (is_dir($upload_dir)) {
+                try {
+                    $iterator = new \RecursiveIteratorIterator(
+                        new \RecursiveDirectoryIterator($upload_dir, \RecursiveDirectoryIterator::SKIP_DOTS),
+                        \RecursiveIteratorIterator::SELF_FIRST
+                    );
+                    $file_counter = 0;
+                    foreach ($iterator as $file) {
+                        if ($file_counter > 50000) {
+                            break; // Guard against infinite or runaway directory trees
+                        }
+                        $file_counter++;
+
+                        if ($file->isFile()) {
+                            $pathname = wp_normalize_path($file->getPathname());
+                            if (str_contains($pathname, '/wso-backups/')) {
+                                continue;
+                            }
+                            $ext = strtolower($file->getExtension());
+                            if ($ext === 'webp') {
+                                $webp_count++;
+                                $cache_bytes += $file->getSize();
+                            } elseif ($ext === 'avif') {
+                                $avif_count++;
+                                $cache_bytes += $file->getSize();
+                            }
+                        }
                     }
+                } catch (\Throwable $e) {
+                    // Fail gracefully on file permission or path errors
                 }
             }
+
+            $folder_stats = [
+                'webp_count'  => $webp_count,
+                'avif_count'  => $avif_count,
+                'cache_bytes' => $cache_bytes,
+            ];
+            set_transient('wso_dashboard_folder_stats', $folder_stats, HOUR_IN_SECONDS);
+        } else {
+            $webp_count  = (int) ($folder_stats['webp_count'] ?? 0);
+            $avif_count  = (int) ($folder_stats['avif_count'] ?? 0);
+            $cache_bytes = (int) ($folder_stats['cache_bytes'] ?? 0);
         }
 
         $queue_stats = Queue_Manager::instance()->get_stats();
