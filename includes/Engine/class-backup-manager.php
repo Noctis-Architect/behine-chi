@@ -229,9 +229,52 @@ class Backup_Manager {
             }
         }
 
-        // Clean attachment postmeta
+        // Revert attachment records in database before deleting meta
         global $wpdb;
+        $optimized_attachments = $wpdb->get_col("SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_wso_optimized' AND meta_value = '1'");
+        if (!empty($optimized_attachments)) {
+            if (file_exists(ABSPATH . 'wp-admin/includes/image.php')) {
+                require_once ABSPATH . 'wp-admin/includes/image.php';
+            }
+            $basedir = wp_upload_dir()['basedir'];
+
+            foreach ($optimized_attachments as $att_id) {
+                $att_id = (int) $att_id;
+                $current_file = get_attached_file($att_id);
+                if (!$current_file) {
+                    continue;
+                }
+
+                $ext = strtolower(pathinfo($current_file, PATHINFO_EXTENSION));
+                if (in_array($ext, ['webp', 'avif'], true)) {
+                    $base = pathinfo($current_file, PATHINFO_DIRNAME) . '/' . pathinfo($current_file, PATHINFO_FILENAME);
+                    foreach (['jpg', 'jpeg', 'png', 'svg'] as $orig_ext) {
+                        $candidate = $base . '.' . $orig_ext;
+                        if (file_exists($candidate)) {
+                            $rel = ltrim(str_replace($basedir, '', $candidate), '/\\');
+                            update_post_meta($att_id, '_wp_attached_file', $rel);
+                            $type = wp_check_filetype($candidate);
+                            if (!empty($type['type'])) {
+                                $wpdb->update($wpdb->posts, ['post_mime_type' => $type['type']], ['ID' => $att_id]);
+                            }
+                            if (function_exists('wp_generate_attachment_metadata')) {
+                                $new_meta = wp_generate_attachment_metadata($att_id, $candidate);
+                                if (is_array($new_meta)) {
+                                    wp_update_attachment_metadata($att_id, $new_meta);
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Clean attachment postmeta
         $wpdb->query("DELETE FROM {$wpdb->postmeta} WHERE meta_key IN ('_wso_optimized', '_wso_opt_data', '_wso_wm_hash')");
+
+        // Clear cached stats transient
+        delete_transient('wso_dashboard_folder_stats');
 
         return $count;
     }
