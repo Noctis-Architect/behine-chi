@@ -56,14 +56,20 @@ class Queue_Manager {
             'post_mime_type' => ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'],
             'posts_per_page' => -1,
             'fields'         => 'ids',
+            'meta_query'     => [
+                [
+                    'key'     => '_wso_optimized',
+                    'compare' => 'NOT EXISTS',
+                ],
+            ],
         ];
 
         $query = new \WP_Query($args);
         $attachment_ids = $query->posts;
 
-        // Get currently pending attachment IDs in the queue to avoid duplication
+        // Get currently active attachment IDs in the queue to avoid duplication
         $existing_queued = $wpdb->get_col(
-            "SELECT attachment_id FROM {$table} WHERE attachment_id > 0 AND status = 'pending'"
+            "SELECT attachment_id FROM {$table} WHERE attachment_id > 0 AND status IN ('pending', 'processing')"
         );
         $existing_map = array_flip($existing_queued ?: []);
 
